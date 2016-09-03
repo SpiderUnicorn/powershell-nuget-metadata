@@ -1,7 +1,7 @@
 #function Get-NuGetPackageMetadata {
     [CmdLetBinding()]
     Param(
-        [Parameter(Position = 1)]
+        [Parameter(Position = 1, Mandatory = $true)]
         [string]$Path = "."
     )
 
@@ -11,25 +11,29 @@
         'Path'    = $Path
         'Recurse' = $true
     }
-    
+    <#
+    function ConvertFrom-Xml {
+        Param(
+        )
+    }
+    #>
     Get-ChildItem @GCIParam |
-    Where-Object { $_.Extension -eq '.nupkg' } |
+    Where-Object { $_.Extension -eq '.`nupkg' } |
     ForEach-Object {
+        Write-Host $_.FullName
         [IO.Compression.ZipFile]::OpenRead($_.FullName).Entries |
         Where-Object { $_.Name -match '\.nuspec$' } |
         ForEach-Object {
-            $memoryStream = New-Object System.IO.MemoryStream
-            $file = $_.Open()
-            $file.CopyTo($memoryStream)
-            $file.Dispose()
-            $memoryStream.Position = 0
-            $reader = New-Object System.IO.StreamReader($memoryStream)
-            [xml]$fileContent = $reader.ReadToEnd()
-            $reader.Dispose()
-            $memoryStream.Dispose()
-            $fileContent.package.metadata
+            $deflateStream = $_.Open()
+            $streamReader = New-Object System.IO.StreamReader($deflateStream)
+            [System.Xml.XmlDocument]$fileContent = $streamReader.ReadToEnd()
+            $deflateStream.Dispose()
+            #$streamReader = New-Object System.IO.StreamReader($_.Open())    #shorter, but memory leak?
+            $streamReader.Dispose()
+            Write-Verbose "fileContent.GetType() $($fileContent.GetType())"
+            
+            Write-Output $fileContent.package.metadata
         }
     }
 #}
 #Export-ModuleMember Get-NuGetPackageMetadata
-
