@@ -1,7 +1,7 @@
 #function Get-NuGetPackageMetadata {
     [CmdLetBinding()]
     Param(
-        [Parameter(Position = 1)]
+        [Parameter(Position = 1, ValueFromPipeline = $true)]
         [string]$Path = "."
     )
 
