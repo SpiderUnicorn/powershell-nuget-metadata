@@ -14,7 +14,7 @@ function Get-NuGetPackageMetadata {
     PROCESS {
         foreach ($p in $Path) {
             Get-ChildItem @GCIParam -Path $p |
-            Where-Object { $_.Extension -eq '.nupkg' } |
+            Where-Object { $_.Extension -eq '.nupkg' } | #doesn't handle .nuspec-files not in .nupkg-files, add cmdlet/-switch?
             ForEach-Object {
                 [IO.Compression.ZipFile]::OpenRead($_.FullName).Entries |
                 Where-Object { $_.Name -match '\.nuspec$' } |
@@ -30,8 +30,39 @@ function Get-NuGetPackageMetadata {
             }
         }
     }
-    END {
-    }
+    END {}
 }
 
-Export-ModuleMember Get-NuGetPackageMetadata
+#Get-ZipFileEntry::string -> System.IO.Compression.ZipArchiveEntry
+function Get-ZipFileEntry {
+    [CmdletBinding()]
+    Param(
+        [string[]]$FilePath
+    )
+    BEGIN {
+        Add-Type -AssemblyName "System.IO.Compression.FileSystem"
+    }
+    PROCESS {
+        foreach ($file in $FilePath) {
+            try {
+                $fullName = (Resolve-Path -ErrorAction Stop $file).Path
+                [IO.Compression.ZipFile]::OpenRead($fullName).Entries
+            }
+            catch {
+                #todo: implementera felhantering
+                $exc = $_.Exception
+                $exci = $exc.Exception.InnerException
+                write-host "exc" $exc.GetType().FullName
+                write-host "exci" $exci.GetType().FullName
+            }
+        }
+    }
+    END {}
+}
+
+#get-childitem *.nupkg |
+#get-zipfileentry *.nuspec |
+#get-zipfileentrycontent |
+#$_.package.metadata
+
+#Export-ModuleMember Get-NuGetPackageMetadata
