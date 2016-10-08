@@ -1,53 +1,59 @@
 . ".\NuGetPackageMetadata.ps1"
 
-$testFile = "./test/test.zip"
-$relativePath = "./test/test.zip"
-$absolutePath = (Resolve-Path $relativePath).Path
-$nonExistentPath = "./non-existent.file"
-$directoryPath = "."
-$notZipFilePath = "./test/test.txt"
+$pathFile = @{
+    test     = "./test/test.zip"
+    relative = "./test/test.zip"
+    nonExistent = "./non-existent.file"
+    directory = "." #?
+    notZipFile = "./test/test.txt"
+}
+$pathFile['absolute'] = (Resolve-Path $pathFile.relative).Path
 
-Describe "Get-ZipFileEntry" {
-    Context "Given no file (null)" {
-        It "Via parameter: Returns null" {
-            Get-ZipFileEntry $null | Should be $null
-        }
-        It "Via pipe: Returns null" {
-            $null | Get-ZipFileEntry | Should be $null
-        }
-    }
-    Context "Given no file (empty string)" {
-        It "Via parameter: Has errors" {
-            Get-ZipFileEntry "" -ErrorVariable err 2>$null
-            $err | Should not BeNullOrEmpty
-        }
-        It "Via pipe: Has errors" {
-            "" | Get-ZipFileEntry -ErrorVariable err 2>$null
-            $err | Should not BeNullOrEmpty
+$dirPath = @{
+    todo = "todo"
+}
+
+Describe "Get-NuGetPackageMetadata" {
+    Context "Given no path (null/empty string)" {
+        It "It throws non-terminating exception" {
+            { Get-NuGetPackageMetadata $null } | Should throw
+            { Get-NuGetPackageMetadata "" } | Should throw
         }
     }
     Context "Given different types of paths" {
-        It "Resolves absolute paths" {
-            { Get-ZipFileEntry $absolutePath } | Should not be $null
+        It "works with absolute paths" {
+            { Get-NuGetPackageMetadata $pathFile.absolute } | Should not be $null
         }
-        It "Resolves relative paths" {
-            { Get-ZipFileEntry $relativePath } | Should not be $null
+        It "works with relative paths" {
+            { Get-NuGetPackageMetadata $pathFile.relative } | Should not be $null
         }
     }
     Context "Given non-existent file path" {
+        It "It returns null" {
+            Get-NuGetPackageMetadata $pathFile.nonExistent | Should be $null
+        }
+    }
+    Context "Given existing file path" {
+        It "works" {
+            #todo
+        }
+    }
+    Context "Given existing directory path" {
+        It "works" {
+            #todo
+        }
+    }
+}
+
+Describe "Get-ZipFileEntry" {
+    Context "Given a directory path" {
         It "Has errors" {
-            Get-ZipFileEntry $nonExistentPath -ErrorVariable err 2>$null
+            Get-ZipFileEntry $pathFile.directory -ErrorVariable err 2>$null
             $err | Should not BeNullOrEmpty
         }
     }
-    Context "Given a directory" {
-        It "Has errors" {
-            Get-ZipFileEntry $directoryPath -ErrorVariable err 2>$null
-            $err | Should not BeNullOrEmpty
-        }
-    }
-    Context "Given example zip file path with one file" {
-        $result = Get-ZipFileEntry (Resolve-Path $testFile).Path
+    Context "Given example zip file with some files" {
+        $result = Get-ZipFileEntry (Resolve-Path $pathFile.test).Path
         It "Return a non-empty collection" {
             $result.Count | Should BeGreaterThan 0
         }
@@ -56,8 +62,8 @@ Describe "Get-ZipFileEntry" {
         }
     }
     Context "Given a non zip file" {
-        It "something" {
-            Get-ZipFileEntry $notZipFilePath 2>$null -ErrorVariable err
+        It "Has errors" {
+            Get-ZipFileEntry $pathFile.notZipFile 2>$null -ErrorVariable err
             $err | Should not BeNullOrEmpty
         }
     }
@@ -70,25 +76,26 @@ Describe "Get-ZipFileEntryContent" {
         }
     }
     Context "Given a zip file entry" {
-        It "Should not throw" {
-            { Get-ZipFileEntry $testFile |
+        It "Should not throw" { #actually never throws :)
+            { Get-ZipFileEntry $pathFile.test |
             Get-ZipFileEntryContent } |
             Should not throw
         }
         It "Gets the contents of the file" {
-            { Get-ZipFileEntry $testFile |
+            { Get-ZipFileEntry $pathFile.test |
             Get-ZipFileEntryContent } |
             Should not BeNullOrEmpty
         }
     }
     Context "When file couldn't be opened" {
-        It "Should throw" {
+        It "Should have errors" {
             #Pester cannot mock .Open()
             #so we make a stub that always throw
             $obj = @{}
-            $obj | Add-Member -MemberType ScriptMethod -Name Open -Value { throw "couldn't open" }
+            $obj | Add-Member -MemberType ScriptMethod -Name Open -Value { throw "this method always throw an exception" }
             Get-ZipFileEntryContent $obj -ErrorVariable err 2>$null
             $err | Should not BeNullOrEmpty
         }
     }
 }
+

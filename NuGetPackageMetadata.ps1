@@ -1,34 +1,39 @@
+#Get-NuGetPackageMetadata::string -> XmlDocument
 function Get-NuGetPackageMetadata {
     [CmdLetBinding()]
     Param(
-        [Parameter(Position = 1, ValueFromPipeline = $true)]
-        [string[]]$Path = "."
+        [Parameter(
+            Position = 1,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string[]]$Path = ".",
+
+        [Parameter(Position = 2)]
+        [string[]]$PatternFile = '*.nupkg',
+
+        [Parameter(Position = 3)]
+        [string[]]$PatternEntry = '*.nuspec',
+
+        [switch]$NoRecurse
     )
     BEGIN {
         Add-Type -AssemblyName "System.IO.Compression.FileSystem"
         $GCIParam = @{
-            'Recurse' = $true #!$NoRecurse
+            'Recurse' = !$NoRecurse
             'File'    = $true
-            #'Filter' = '*.nupkg' #doesn't handle multiple filters
         }
-        #$Pattern = '*.nupkg', '*.zip' #todo: parameter?
     }
     PROCESS {
         foreach ($p in $Path) {
-            Get-ChildItem @GCIParam -Path $p |
-            Where-Object { $_.Extension -eq '.nupkg' } | #doesn't handle .nuspec-files not in .nupkg-files, add cmdlet/-switch?
-            ForEach-Object {
-                [IO.Compression.ZipFile]::OpenRead($_.FullName).Entries |
-                Where-Object { $_.Name -match '\.nuspec$' } |
-                ForEach-Object {
-                    $deflateStream = $_.Open()
-                    $streamReader = New-Object System.IO.StreamReader($deflateStream)
-                    [System.Xml.XmlDocument]$fileContent = $streamReader.ReadToEnd()
-                    $deflateStream.Dispose()
-                    #$streamReader = New-Object System.IO.StreamReader($_.Open()) #shorter, but possible memory leak?
-                    $streamReader.Dispose()
-                    $fileContent.package.metadata
-                }
+            if (Test-Path $p) {
+                Get-ChildItem @GCIParam -Path $p |
+                Select-MatchingFullName -Pattern $PatternFile |
+                Get-ZipFileEntry |
+                Select-MatchingFullName -Pattern $PatternEntry |
+                Get-ZipFileEntryContent |
+                Get-NuGetMetadata
             }
         }
     }
@@ -47,11 +52,10 @@ function Get-ZipFileEntry {
         [string[]]$FilePath
     )
     BEGIN {
-        #todo: $Pattern = '*.nuspec', '*.txt'
         Add-Type -AssemblyName "System.IO.Compression.FileSystem"
     }
     PROCESS {
-       foreach ($file in $FilePath) {
+        foreach ($file in $FilePath) {
             try {
                 $fullName = (Resolve-Path -Path $file -ErrorAction Stop).Path
                 if (!(Test-Path -Path $fullName -PathType Leaf)) {
@@ -64,15 +68,7 @@ function Get-ZipFileEntry {
                 Write-Error "'$fullName' is not a zip file"
             }
             catch {
-                #pokemon exception handling
-                $eName = $_.Exception.GetType().FullName
-                $eMsg = $_.Exception.Message
-                if ($_.Exception.InnerException) {
-                    $eInnerName = $_.Exception.InnerException.GetType().FullName
-                    $eInnerMsg = $_.Exception.InnerException.Message
-                }
-                Write-Error -Message "[$eName] : $eMsg"
-                Write-Error -Message "[$eInnerName] : $eInnerMsg"
+                Write-ExceptionAsError $_
             }
             finally {
                 if ($zipFile) { $zipFile.Dispose() }
@@ -81,8 +77,6 @@ function Get-ZipFileEntry {
     }
     END {}
 }
-
-#Get-ZipFileEntry -FilePath "stuff"
 
 #Get-ZipFileEntryContent::System.IO.Compression.ZipArchiveEntry -> string
 function Get-ZipFileEntryContent {
@@ -97,16 +91,15 @@ function Get-ZipFileEntryContent {
     )
     BEGIN {}
     PROCESS {
-        #filter on filename, like '\.nuspec$'
         foreach ($file in $FileName) {
             try {
-                $deflateStream = $file.Open() #mocka lite
+                $deflateStream = $file.Open()
                 $streamReader = New-Object System.IO.StreamReader($deflateStream)
                 $fileContent = $streamReader.ReadToEnd()
                 $fileContent
             }
             catch {
-                Write-Error -Message "'$file' could not be read"
+                Write-ExceptionAsError $_
             }
             finally {
                 if ($deflateStream) { $deflateStream.Dispose() }
@@ -117,16 +110,56 @@ function Get-ZipFileEntryContent {
     END {}
 }
 
-<#
+#Get-NuGetMetadata::string -> XmlDocument
 function Get-NuGetMetadata {
-    [System.Xml.XmlDocument]$stuff
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipeline = $true
+        )]
+        [string[]]$XmlFileContent
+    )
+    BEGIN {}
+    PROCESS {
+        foreach($file in $XmlFileContent) {
+            ([System.Xml.XmlDocument]$file).package.metadata
+        }
+    }
+    END {}
 }
-#>
 
-#get-childitem *.nupkg |
-#get-zipfileentry *.nuspec |
-#get-zipfileentrycontent |
-#get-nugetmetadata |
-#$_.package.metadata
+function Select-MatchingFullName {
+    [CmdletBinding()]
+    Param(
+        [Parameter(ValueFromPipeline = $true)]
+        $InputObject,
+
+        [string[]]$Pattern = '*'
+    )
+    BEGIN {}
+    PROCESS {
+        foreach ($obj in $InputObject) {
+            foreach ($pat in $Pattern) {
+                if ($obj.FullName -like $pat) {
+                    $obj
+                    break
+                }
+            }
+        }
+    }
+    END {}
+}
+
+function Write-ExceptionAsError {
+    Param(
+        $ex
+    )
+    if (-not ($ex = $_.Exception.InnerException)) {
+        $ex = $_.Exception
+    }
+    $exName = $ex.GetType().FullName
+    $exMsg = $ex.Message
+    Write-Error -Message "[$exName] : $exMsg"
+}
 
 #Export-ModuleMember Get-NuGetPackageMetadata
