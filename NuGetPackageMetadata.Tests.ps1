@@ -1,16 +1,17 @@
 . ".\NuGetPackageMetadata.ps1"
 
-$pathFile = @{
+#warning: in the middle of a rewrite
+
+$filePath = @{
     test     = "./test/test.zip"
     relative = "./test/test.zip"
     nonExistent = "./non-existent.file"
-    directory = "." #?
     notZipFile = "./test/test.txt"
 }
-$pathFile['absolute'] = (Resolve-Path $pathFile.relative).Path
+$filePath['absolute'] = (Resolve-Path $filePath.relative).Path
 
 $dirPath = @{
-    todo = "todo"
+    currentFolder = "."
 }
 
 Describe "Get-NuGetPackageMetadata" {
@@ -22,15 +23,16 @@ Describe "Get-NuGetPackageMetadata" {
     }
     Context "Given different types of paths" {
         It "works with absolute paths" {
-            { Get-NuGetPackageMetadata $pathFile.absolute } | Should not be $null
+            { Get-NuGetPackageMetadata $filePath.absolute } | Should not be $null
         }
         It "works with relative paths" {
-            { Get-NuGetPackageMetadata $pathFile.relative } | Should not be $null
+            { Get-NuGetPackageMetadata $filePath.relative } | Should not be $null
         }
     }
     Context "Given non-existent file path" {
-        It "It returns null" {
-            Get-NuGetPackageMetadata $pathFile.nonExistent | Should be $null
+        It "Has errors" {
+            Get-NuGetPackageMetadata $filePath.nonExistent -ErrorVariable err 2>$null
+            $err.Count | Should BeGreaterThan 0
         }
     }
     Context "Given existing file path" {
@@ -48,12 +50,12 @@ Describe "Get-NuGetPackageMetadata" {
 Describe "Get-ZipFileEntry" {
     Context "Given a directory path" {
         It "Has errors" {
-            Get-ZipFileEntry $pathFile.directory -ErrorVariable err 2>$null
+            Get-ZipFileEntry $dirPath.currentFolder -ErrorVariable err 2>$null
             $err | Should not BeNullOrEmpty
         }
     }
     Context "Given example zip file with some files" {
-        $result = Get-ZipFileEntry (Resolve-Path $pathFile.test).Path
+        $result = Get-ZipFileEntry (Resolve-Path $filePath.test).Path
         It "Return a non-empty collection" {
             $result.Count | Should BeGreaterThan 0
         }
@@ -63,7 +65,7 @@ Describe "Get-ZipFileEntry" {
     }
     Context "Given a non zip file" {
         It "Has errors" {
-            Get-ZipFileEntry $pathFile.notZipFile 2>$null -ErrorVariable err
+            Get-ZipFileEntry $filePath.notZipFile 2>$null -ErrorVariable err
             $err | Should not BeNullOrEmpty
         }
     }
@@ -77,12 +79,12 @@ Describe "Get-ZipFileEntryContent" {
     }
     Context "Given a zip file entry" {
         It "Should not throw" { #actually never throws :)
-            { Get-ZipFileEntry $pathFile.test |
+            { Get-ZipFileEntry $filePath.test |
             Get-ZipFileEntryContent } |
             Should not throw
         }
         It "Gets the contents of the file" {
-            { Get-ZipFileEntry $pathFile.test |
+            { Get-ZipFileEntry $filePath.test |
             Get-ZipFileEntryContent } |
             Should not BeNullOrEmpty
         }
@@ -91,6 +93,7 @@ Describe "Get-ZipFileEntryContent" {
         It "Should have errors" {
             #Pester cannot mock .Open()
             #so we make a stub that always throw
+            #todo: mock gettype()?
             $obj = @{}
             $obj | Add-Member -MemberType ScriptMethod -Name Open -Value { throw "this method always throw an exception" }
             Get-ZipFileEntryContent $obj -ErrorVariable err 2>$null

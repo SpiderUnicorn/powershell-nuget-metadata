@@ -19,7 +19,6 @@ function Get-NuGetPackageMetadata {
         [switch]$NoRecurse
     )
     BEGIN {
-        Add-Type -AssemblyName "System.IO.Compression.FileSystem"
         $GCIParam = @{
             'Recurse' = !$NoRecurse
             'File'    = $true
@@ -34,6 +33,9 @@ function Get-NuGetPackageMetadata {
                 Select-MatchingFullName -Pattern $PatternEntry |
                 Get-ZipFileEntryContent |
                 Get-NuGetMetadata
+            }
+            else {
+                Write-Error -Message "Path '$p' not found"
             }
         }
     }
@@ -152,14 +154,14 @@ function Select-MatchingFullName {
 
 function Write-ExceptionAsError {
     Param(
-        $ex
+        $Exception
     )
-    if (-not ($ex = $_.Exception.InnerException)) {
-        $ex = $_.Exception
+    if (-not ($ex = $Exception.Exception.InnerException)) {
+        $ex = $Exception.Exception
     }
     $exName = $ex.GetType().FullName
     $exMsg = $ex.Message
     Write-Error -Message "[$exName] : $exMsg"
 }
 
-#Export-ModuleMember Get-NuGetPackageMetadata
+#Export-ModuleMember Get-SomethingSomething
