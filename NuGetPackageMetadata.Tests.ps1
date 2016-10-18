@@ -80,25 +80,26 @@ Describe "Get-ZipFileEntryContent" {
     Context "Given a zip file entry" {
         It "Should not throw" { #actually never throws :)
             { Get-ZipFileEntry $filePath.test |
-            Get-ZipFileEntryContent } |
-            Should not throw
+                Get-ZipFileEntryContent } |
+                Should not throw
         }
         It "Gets the contents of the file" {
             { Get-ZipFileEntry $filePath.test |
-            Get-ZipFileEntryContent } |
-            Should not BeNullOrEmpty
+                Get-ZipFileEntryContent } |
+                Should not BeNullOrEmpty
         }
     }
     Context "When file couldn't be opened" {
         It "Should have errors" {
             #Pester cannot mock .Open()
             #so we make a stub that always throw
-            #todo: mock gettype()?
-            $obj = @{}
-            $obj | Add-Member -MemberType ScriptMethod -Name Open -Value { throw "this method always throw an exception" }
+            Add-Type -AssemblyName "System.IO.Compression.FileSystem"
+            $zipFile = [System.IO.Compression.ZipFile]::OpenRead($filePath.absolute)
+            $obj = $zipFile.Entries[0]
+            $obj | Add-Member -MemberType ScriptMethod -Name Open -Value { throw "this method always throw an exception" } -Force
             Get-ZipFileEntryContent $obj -ErrorVariable err 2>$null
             $err | Should not BeNullOrEmpty
+            $zipFile.Dispose()
         }
     }
 }
-

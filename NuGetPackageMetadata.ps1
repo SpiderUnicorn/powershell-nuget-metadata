@@ -28,11 +28,12 @@ function Get-NuGetPackageMetadata {
         foreach ($p in $Path) {
             if (Test-Path $p) {
                 Get-ChildItem @GCIParam -Path $p |
-                Select-MatchingFullName -Pattern $PatternFile |
-                Get-ZipFileEntry |
-                Select-MatchingFullName -Pattern $PatternEntry |
-                Get-ZipFileEntryContent |
-                Get-NuGetMetadata
+                    SelectMatchingFullName -Pattern $PatternFile |
+                    Get-ZipFileEntry |
+                    SelectMatchingFullName -Pattern $PatternEntry |
+                    Get-ZipFileEntryContent |
+                    ConvertTo-Xml |
+                    GetNuGetMetadata
             }
             else {
                 Write-Error -Message "Path '$p' not found"
@@ -63,14 +64,14 @@ function Get-ZipFileEntry {
                 if (!(Test-Path -Path $fullName -PathType Leaf)) {
                     throw "'$fullName' is not a file"
                 }
-                $zipFile = [IO.Compression.ZipFile]::OpenRead($fullName)
+                $zipFile = [System.IO.Compression.ZipFile]::OpenRead($fullName)
                 $zipFile.Entries
             }
             catch [System.IO.InvalidDataException] {
                 Write-Error "'$fullName' is not a zip file"
             }
             catch {
-                Write-ExceptionAsError $_
+                WriteExceptionAsError $_
             }
             finally {
                 if ($zipFile) { $zipFile.Dispose() }
@@ -89,7 +90,7 @@ function Get-ZipFileEntryContent {
             ValueFromPipelineByPropertyName = $true
         )]
         [Alias('FullName')]
-        $FileName
+        [System.IO.Compression.ZipArchiveEntry]$FileName
     )
     BEGIN {}
     PROCESS {
@@ -101,7 +102,7 @@ function Get-ZipFileEntryContent {
                 $fileContent
             }
             catch {
-                Write-ExceptionAsError $_
+                WriteExceptionAsError $_
             }
             finally {
                 if ($deflateStream) { $deflateStream.Dispose() }
@@ -112,25 +113,23 @@ function Get-ZipFileEntryContent {
     END {}
 }
 
-#Get-NuGetMetadata::string -> XmlDocument
-function Get-NuGetMetadata {
+#Get-NuGetMetadata::XmlDocument -> XmlDocument
+function GetNuGetMetadata {
     Param(
         [Parameter(
             Mandatory = $true,
             ValueFromPipeline = $true
         )]
-        [string[]]$XmlFileContent
+        [XmlDocument]$Xml
     )
     BEGIN {}
     PROCESS {
-        foreach($file in $XmlFileContent) {
-            ([System.Xml.XmlDocument]$file).package.metadata
-        }
+        $Xml.package.metadata
     }
     END {}
 }
 
-function Select-MatchingFullName {
+function SelectMatchingFullName {
     [CmdletBinding()]
     Param(
         [Parameter(ValueFromPipeline = $true)]
@@ -152,7 +151,7 @@ function Select-MatchingFullName {
     END {}
 }
 
-function Write-ExceptionAsError {
+function WriteExceptionAsError {
     Param(
         $Exception
     )
@@ -164,4 +163,5 @@ function Write-ExceptionAsError {
     Write-Error -Message "[$exName] : $exMsg"
 }
 
-#Export-ModuleMember Get-SomethingSomething
+#internal functions = no dashes, export with *-*
+#Export-ModuleMember *-*
