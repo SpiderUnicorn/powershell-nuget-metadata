@@ -15,7 +15,6 @@ By default, the cmdlet recursively searches for .nuspec files relative to the fo
 Get-NuGetPackageMetadata
 ```
 
-
 ## Release History
 
 * 1.0.0
