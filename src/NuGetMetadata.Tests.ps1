@@ -1,13 +1,11 @@
-. ".\NuGetPackageMetadata.ps1"
-
-#warning: in the middle of a rewrite
+Import-Module "./NuGetMetadata.psm1"
 
 $filePath = @{
-    test        = "./test/test.zip"
-    relative    = "./test/test.zip"
-    nupkg       = "./test/example.nupkg"
-    nonExistent = "./non-existent.file"
-    notZipFile  = "./test/test.txt"
+    test        = "../test/test.zip"
+    relative    = "../test/test.zip"
+    nupkg       = "../test/example.nupkg"
+    nonExistent = "../non-existent.file"
+    notZipFile  = "../test/test.txt"
 }
 $filePath['absolute'] = (Resolve-Path $filePath.relative).Path
 
@@ -15,30 +13,30 @@ $dirPath = @{
     currentFolder = "."
 }
 
-Describe "Get-NuGetPackageMetadata" {
+Describe "Get-NuGetMetaData" {
     Context "Given no path (null/empty string)" {
         It "It throws non-terminating exception" {
-            { Get-NuGetPackageMetadata $null } | Should throw
-            { Get-NuGetPackageMetadata "" } | Should throw
+            { Get-NuGetMetaData $null } | Should throw
+            { Get-NuGetMetaData "" } | Should throw
         }
     }
     Context "Given different types of paths" {
         It "works with absolute paths" {
-            { Get-NuGetPackageMetadata $filePath.absolute } | Should not be $null
+            { Get-NuGetMetaData $filePath.absolute } | Should not be $null
         }
         It "works with relative paths" {
-            { Get-NuGetPackageMetadata $filePath.relative } | Should not be $null
+            { Get-NuGetMetaData $filePath.relative } | Should not be $null
         }
     }
     Context "Given non-existent file path" {
         It "Has errors" {
-            Get-NuGetPackageMetadata $filePath.nonExistent -ErrorVariable err 2>$null
+            Get-NuGetMetaData $filePath.nonExistent -ErrorVariable err 2>$null
             $err.Count | Should BeGreaterThan 0
         }
     }
     Context "Given example file path" {
         It "Reads the content of the file" {
-            @(Get-NuGetPackageMetadata $filePath.nupkg).Count | Should BeGreaterThan 0
+            @(Get-NuGetMetaData $filePath.nupkg).Count | Should BeGreaterThan 0
         }
     }
 }
