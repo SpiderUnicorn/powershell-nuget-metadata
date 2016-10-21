@@ -3,10 +3,11 @@
 #warning: in the middle of a rewrite
 
 $filePath = @{
-    test     = "./test/test.zip"
-    relative = "./test/test.zip"
+    test        = "./test/test.zip"
+    relative    = "./test/test.zip"
+    nupkg       = "./test/example.nupkg"
     nonExistent = "./non-existent.file"
-    notZipFile = "./test/test.txt"
+    notZipFile  = "./test/test.txt"
 }
 $filePath['absolute'] = (Resolve-Path $filePath.relative).Path
 
@@ -35,14 +36,9 @@ Describe "Get-NuGetPackageMetadata" {
             $err.Count | Should BeGreaterThan 0
         }
     }
-    Context "Given existing file path" {
-        It "works" {
-            #todo
-        }
-    }
-    Context "Given existing directory path" {
-        It "works" {
-            #todo
+    Context "Given example file path" {
+        It "Reads the content of the file" {
+            @(Get-NuGetPackageMetadata $filePath.nupkg).Count | Should BeGreaterThan 0
         }
     }
 }

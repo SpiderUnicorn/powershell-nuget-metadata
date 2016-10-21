@@ -1,5 +1,5 @@
 #Get-NuGetPackageMetadata::string -> XmlDocument
-function Get-NuGetPackageMetadata {
+function Get-NuGetMetadata {
     [CmdLetBinding()]
     Param(
         [Parameter(
@@ -32,8 +32,7 @@ function Get-NuGetPackageMetadata {
                     Get-ZipFileEntry |
                     SelectMatchingFullName -Pattern $PatternEntry |
                     Get-ZipFileEntryContent |
-                    ConvertTo-Xml |
-                    GetNuGetMetadata
+                    GetNuGetPackageMetadata
             }
             else {
                 Write-Error -Message "Path '$p' not found"
@@ -90,7 +89,7 @@ function Get-ZipFileEntryContent {
             ValueFromPipelineByPropertyName = $true
         )]
         [Alias('FullName')]
-        [System.IO.Compression.ZipArchiveEntry]$FileName
+        $FileName
     )
     BEGIN {}
     PROCESS {
@@ -114,17 +113,24 @@ function Get-ZipFileEntryContent {
 }
 
 #Get-NuGetMetadata::XmlDocument -> XmlDocument
-function GetNuGetMetadata {
+function GetNuGetPackageMetadata {
     Param(
         [Parameter(
             Mandatory = $true,
             ValueFromPipeline = $true
         )]
-        [XmlDocument]$Xml
+        [string[]]$Xml,
+
+        [switch]$IncludeFullXml
     )
     BEGIN {}
     PROCESS {
-        $Xml.package.metadata
+        if ($IncludeFullXml) {
+            [xml]$Xml
+        }
+        else {
+            ([xml]$Xml).package.metadata
+        }
     }
     END {}
 }
@@ -163,5 +169,5 @@ function WriteExceptionAsError {
     Write-Error -Message "[$exName] : $exMsg"
 }
 
-#internal functions = no dashes, export with *-*
+#internal functions = no dashes
 #Export-ModuleMember *-*
