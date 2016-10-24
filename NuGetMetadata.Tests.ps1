@@ -72,7 +72,7 @@ Describe "Get-ZipFileEntryContent" {
         }
     }
     Context "Given a zip file entry" {
-        It "Should not throw" { #actually never throws :)
+        It "Should not throw" { # actually never throws :)
             { Get-ZipFileEntry $filePath.test |
                 Get-ZipFileEntryContent } |
                 Should not throw
@@ -85,8 +85,8 @@ Describe "Get-ZipFileEntryContent" {
     }
     Context "When file couldn't be opened" {
         It "Should have errors" {
-            #Pester cannot mock .Open()
-            #so we make a stub that always throw
+            # Pester cannot mock .Open()
+            # so we make a stub that always throws
             Add-Type -AssemblyName "System.IO.Compression.FileSystem"
             $zipFile = [System.IO.Compression.ZipFile]::OpenRead($filePath.absolute)
             $obj = $zipFile.Entries[0]
