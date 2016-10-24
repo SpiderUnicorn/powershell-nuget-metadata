@@ -9,7 +9,10 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 If you don't have any previous experience with scripting or PowerShell, follow the examples below.
 
 ## Installation
-
+Open powershell and run
+```
+$ Install-Module NuGetMetadata
+```
 ## Examples
 ### Simple usage
 By default, the cmdlet recursively searches for .nupkg files in the folder you're in.
