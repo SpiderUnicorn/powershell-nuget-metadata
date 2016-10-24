@@ -96,4 +96,9 @@ Describe "Get-ZipFileEntryContent" {
             $zipFile.Dispose()
         }
     }
+    Context "Failing unit test" {
+        It "Fails" {
+            1 | Should Be 2
+        }
+    }
 }
