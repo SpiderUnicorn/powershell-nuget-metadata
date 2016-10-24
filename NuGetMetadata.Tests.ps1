@@ -1,11 +1,11 @@
 Import-Module "./NuGetMetadata.psm1"
 
 $filePath = @{
-    test        = "../test/test.zip"
-    relative    = "../test/test.zip"
-    nupkg       = "../test/example.nupkg"
-    nonExistent = "../non-existent.file"
-    notZipFile  = "../test/test.txt"
+    test        = "./test/test.zip"
+    relative    = "./test/test.zip"
+    nupkg       = "./test/example.nupkg"
+    nonExistent = "./non-existent.file"
+    notZipFile  = "./test/test.txt"
 }
 $filePath['absolute'] = (Resolve-Path $filePath.relative).Path
 
