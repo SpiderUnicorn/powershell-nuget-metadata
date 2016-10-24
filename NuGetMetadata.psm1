@@ -1,6 +1,6 @@
 #assemblies loaded in the manifest:
-#Add-Type -AssemblyName "System.IO.Compression"
-#Add-Type -AssemblyName "System.IO.Compression.FileSystem"
+Add-Type -AssemblyName "System.IO.Compression"
+Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
 #::string -> XmlDocument
 function Get-NuGetMetadata {
