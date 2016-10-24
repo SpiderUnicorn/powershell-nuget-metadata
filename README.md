@@ -1,4 +1,4 @@
-<h1><img src="logo.png" align="bottom" /> Get NuGet Metadata Cmdlet</h1>
+<h1><img src="logo.png" align="bottom" /> Powershell NuGet Metadata Cmdlet</h1>
 Ever wanted to get metadata from your NuGet packages, such as author or license information? 
 Got lost looking for it in Visual Studio? Are you looking for a simple script that is able to 
 output all metadata information from a single command?
