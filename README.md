@@ -11,6 +11,9 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 If you don't have any previous experience with scripting or PowerShell, follow the examples below.
 
 ## Installation
+``
+$ Install-Module NuGetMetadata
+``
 
 ## Examples
 ### Simple usage
