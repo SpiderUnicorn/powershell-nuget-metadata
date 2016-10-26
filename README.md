@@ -54,6 +54,7 @@ PS> Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
 ```
 ## Downloading license information
 > This is just a simple example. One caveat is that it doesn't clean the output folder on each invocation.
+
 In your project directory, create a folder called "Licenses".
 The line below downloads the license url contents, and saves them as separate html files (named after the identifier).
 ```sh
