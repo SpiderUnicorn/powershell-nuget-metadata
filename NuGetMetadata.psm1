@@ -1,4 +1,4 @@
-#assemblies loaded in manifest:
+#assemblies loaded in the manifest:
 Add-Type -AssemblyName "System.IO.Compression"
 Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
@@ -58,10 +58,7 @@ function Get-ZipFileEntry {
         [Alias('FullName')]
         [string[]]$FilePath
     )
-    BEGIN {
-        #moved to manifest
-        #Add-Type -AssemblyName "System.IO.Compression.FileSystem"
-    }
+    BEGIN {}
     PROCESS {
         foreach ($file in $FilePath) {
             Write-Verbose "Get-ZipFileEntry file: $file"
