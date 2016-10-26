@@ -20,7 +20,7 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 
 
 ## Installation
-This cmdlet is hosted on [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/) and completely open to the public to download. To install, open a powershell window (run as administrator) and run the following:
+This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/). To install, simply open a powershell window (run as administrator) and run the following:
 
 ``
 PS> Install-Module NuGetMetadata
@@ -58,7 +58,8 @@ PS> Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
 In your project directory, create a folder called "Licenses".
 The line below downloads the license url contents, and saves them as separate html files (named after the identifier).
 ```sh
-PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content | Out-File -FilePath "./Licenses/$($_.id).html" }
+PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content | \
+Out-File -FilePath "./Licenses/$($_.id).html" }
 ```
 
 ## Release History
