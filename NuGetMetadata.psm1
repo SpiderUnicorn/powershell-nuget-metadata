@@ -19,36 +19,46 @@ Can also take a comma-separated list of files or directories to search.
 When set, subfolders won't be included in the search for .nupkg files. 
 
 .EXAMPLE
-Read all metadata from all packages in the folder you are in, including all subfolders
 Get-NuGetMetadata
 
+Read all metadata from all packages in the folder you are in, including all subfolders
+
 .EXAMPLE
-You can provide both folders and files
 Get-NuGetMetadata C:\Project\
+
+Specify a folder to search for .nupkg files in
+
+.EXAMPLE
 Get-NuGetMetadata .\example.nupkg
 
-Or a combination of both
+Specify a .nupkg file
+
+.EXAMPLE
 Get-NuGetMetadata .\example.nupkg, C:\Project\
 
-.EXAMPLE
-Export output as comma separated values (.csv)
-Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
+Specify a list of files and or folders
 
 .EXAMPLE
+Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
+
+Export output as comma separated values (.csv)
+
+.EXAMPLE
+Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
+
 Export output as json. To make conversion from XML to json simple, use slect-object to
 pluck parts of the  output before converting. 
-Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
 
 .EXAMPLE
 Exlude all standard Microsoft packages
 Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
 
 .EXAMPLE
-You can use the metadata to download license information. This is a simple example
-that downloads licenseUrls as html pages ina folder called "Licenses" (needs to created first).
-
 Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
 Out-File -FilePath "./Licenses/$($_.id).html" }
+
+You can use the metadata to download license information. This is a simple example
+that downloads licenseUrls as html pages ina folder called "Licenses" (needs to created first).
 
 .LINK
 Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
