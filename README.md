@@ -20,7 +20,7 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 
 
 ## Installation
-This cmdlet is hosted on powershell gallery and completely open to the public to download. To install, open a powershell window (run as administrator) and run the following:
+This cmdlet is hosted on [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/) and completely open to the public to download. To install, open a powershell window (run as administrator) and run the following:
 
 ``
 $ Install-Module NuGetMetadata
