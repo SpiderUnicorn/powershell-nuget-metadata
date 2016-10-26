@@ -11,8 +11,8 @@ Look no further!
 2. [Examples](#examples)
   * [Simple usage](#simple-usage)
   * [Exporting output](#exporting-output)
-  * [Downloading license information](#downloading-license-information)
   * [Exluding packages](#excluding-packages)
+  * [Downloading license information](#downloading-license-information)
 3. [Release History](#release-history)
 4. [License](#license)
 
@@ -23,7 +23,7 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 This cmdlet is hosted on [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/) and completely open to the public to download. To install, open a powershell window (run as administrator) and run the following:
 
 ``
-$ Install-Module NuGetMetadata
+PS> Install-Module NuGetMetadata
 ``
 
 ## Examples
@@ -31,23 +31,33 @@ $ Install-Module NuGetMetadata
 By default, the cmdlet recursively searches for .nupkg files in the folder you're in.
 Open a PowerShell prompt in your project directory and run:
 ```sh
-$ Get-NuGetMetadata
+PS> Get-NuGetMetadata
 ```
 It should output the metadata contents of every NuGet package within the project.
 ## Exporting output
 With powershell it's easy to save the data to file.
 ### To CSV
 ```sh
-$ Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
+PS> Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
 ```
 This produces a file named my-metadata-file.csv in the directory you are in.
 ### To JSON
 Since the Get-NugetMetadata cmdlet produces xml, it can't be easily converted to Json using ConvertTo-Json.
 One workaround is to pipe via select, which then creates a PSObject that can be converted:
 ```sh
-$ Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
+PS> Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
 ```
-
+## Excluding packages
+To exclude, for example, Microsoft packages:
+```sh
+PS> Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
+```
+## Downloading license information
+In your project directory, create a folder called "Licenses".
+The line below downloads the license url contents, and saves them as separate html files (named after the identifier).
+```sh
+PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content | Out-File -FilePath "./Licenses/$($_.id).html" }
+```
 
 ## Release History
 
