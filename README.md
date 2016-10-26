@@ -21,12 +21,17 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 
 ## Installation
 <<<<<<< HEAD
+<<<<<<< HEAD
 Open powershell and run
 ```
 $ Install-Module NuGetMetadata
 ```
 =======
 This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/). To install, simply open a powershell window (run as administrator) and run the following:
+=======
+This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/).
+To install, simply open a powershell window (run as administrator) and run the following:
+>>>>>>> fa854c63e0f43a0e12d41e6aa94e2c262b80a06f
 
 ``
 PS> Install-Module NuGetMetadata
@@ -35,12 +40,24 @@ PS> Install-Module NuGetMetadata
 >>>>>>> 706d6559f1345a070365a0d8c7c34359c309eae1
 ## Examples
 ### Simple usage
-By default, the cmdlet recursively searches for .nupkg files in the folder you're in.
 Open a PowerShell prompt in your project directory and run:
 ```sh
 PS> Get-NuGetMetadata
 ```
-It should output the metadata contents of every NuGet package within the project.
+It will output the metadata contents of every NuGet package within the project.
+It does this by searching for .nupkg files in the folder you're in, open them, and output the contents of the .nuspec files it finds.
+
+You can provide both folders and files:
+```sh
+PS> Get-NuGetMetadata C:\Project\
+```
+```sh
+PS> Get-NuGetMetadata .\example.nupkg
+```
+Or a combination of both:
+```sh
+PS> Get-NuGetMetadata .\example.nupkg, C:\Project\
+```
 ## Exporting output
 With powershell it's easy to save the data to file.
 ### To CSV
@@ -49,7 +66,7 @@ PS> Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
 ```
 This produces a file named my-metadata-file.csv in the directory you are in.
 ### To JSON
-Since the Get-NugetMetadata cmdlet produces xml, it can't be easily converted to Json using ConvertTo-Json.
+Since the Get-NugetMetadata cmdlet produces xml objects, it can't be easily converted to Json using ConvertTo-Json.
 One workaround is to pipe via select, which then creates a PSObject that can be converted:
 ```sh
 PS> Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
