@@ -56,6 +56,10 @@ PS> Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
 > This is just a simple example. One caveat is that it doesn't clean the output folder on each invocation.
 
 In your project directory, create a folder called "Licenses".
+```
+PS> mkdir Licenses
+```
+
 The line below downloads the license url contents, and saves them as separate html files (named after the identifier).
 ```sh
 PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
