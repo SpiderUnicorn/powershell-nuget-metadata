@@ -7,15 +7,14 @@ output all metadata information from a single command?
 Look no further!
 
 ## Table of contents
-1. Installation
-2. Examples
- 1. Commandline interface
-  * Simple usage
-  * Exporting output
-  * Downloading license information
-  * Exluding packages
-3. Release History
-4. License
+1. [Installation](#installation)
+2. [Examples](#examples)
+  * [Simple usage](#simple-usage)
+  * [Exporting output](#exporting-output)
+  * [Downloading license information](#downloading-license-information)
+  * [Exluding packages](#excluding-packages)
+3. [Release History](#release-history)
+4. [License](#license)
 
 This cmdlet is easy to use and simple to integrate with your build / continuous integration process. If you don't have any previous experience with scripting or PowerShell, follow the examples below.
 
