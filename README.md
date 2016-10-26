@@ -58,7 +58,7 @@ PS> Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
 In your project directory, create a folder called "Licenses".
 The line below downloads the license url contents, and saves them as separate html files (named after the identifier).
 ```sh
-PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content | \
+PS> Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
 Out-File -FilePath "./Licenses/$($_.id).html" }
 ```
 
