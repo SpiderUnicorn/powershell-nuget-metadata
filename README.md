@@ -6,9 +6,19 @@ Got lost looking for it in Visual Studio? Are you looking for a simple script th
 output all metadata information from a single command?
 Look no further!
 
-This cmdlet is easy to use and simple to integrate with your build / continuous integration process.
+## Table of contents
+1. Installation
+2. Examples
+ 1. Commandline interface
+  * Simple usage
+  * Exporting output
+  * Downloading license information
+  * Exluding packages
+3. Release History
+4. License
 
-If you don't have any previous experience with scripting or PowerShell, follow the examples below.
+This cmdlet is easy to use and simple to integrate with your build / continuous integration process. If you don't have any previous experience with scripting or PowerShell, follow the examples below.
+
 
 ## Installation
 ``
