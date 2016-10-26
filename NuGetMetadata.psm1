@@ -2,6 +2,58 @@
 Add-Type -AssemblyName "System.IO.Compression"
 Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
+<#
+.SYNOPSIS
+Gets metadata from NuGet packages in a project or folder.
+
+.DESCRIPTION
+NuGet stores metada in .nuspec files within .nupkg files which aren't easily accessable. 
+This cmdlet extracts all metadata information as XML from a single package, every package in
+a folder or every package in a folder structure recursively (such as every package on a drive).
+
+.PARAMETER Path
+The directory or file path of a .nupkg file, or directory containing .nupkg files. 
+Can also take a comma-separated list of files or directories to search.
+
+.PARAMETER NoRecurse
+When set, subfolders won't be included in the search for .nupkg files. 
+
+.EXAMPLE
+Read all metadata from all packages in the folder you are in, including all subfolders
+Get-NuGetMetadata
+
+.EXAMPLE
+You can provide both folders and files
+Get-NuGetMetadata C:\Project\
+Get-NuGetMetadata .\example.nupkg
+
+Or a combination of both
+Get-NuGetMetadata .\example.nupkg, C:\Project\
+
+.EXAMPLE
+Export output as comma separated values (.csv)
+Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
+
+.EXAMPLE
+Export output as json. To make conversion from XML to json simple, use slect-object to
+pluck parts of the  output before converting. 
+Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
+
+.EXAMPLE
+Exlude all standard Microsoft packages
+Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
+
+.EXAMPLE
+You can use the metadata to download license information. This is a simple example
+that downloads licenseUrls as html pages ina folder called "Licenses" (needs to created first).
+
+Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
+Out-File -FilePath "./Licenses/$($_.id).html" }
+
+.LINK
+Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
+#>
+
 #::string -> XmlDocument
 function Get-NuGetMetadata {
     [CmdLetBinding()]
