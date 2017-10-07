@@ -3,22 +3,22 @@ Add-Type -AssemblyName "System.IO.Compression"
 Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
 #::string -> XmlDocument
-function Get-NuGetMetadata {
+function Get-NupkgMetadata {
     [CmdLetBinding()]
     Param(
         [Parameter(
-            Position = 1,
+            Position = 0,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true
         )]
         [ValidateNotNullOrEmpty()]
         [string[]]$Path = ".",
 
-        [Parameter(Position = 2)]
-        [string[]]$PatternFile = '*.nupkg',
+        [Parameter(Position = 1)]
+        [string[]]$FilePattern = '*.nupkg',
 
-        [Parameter(Position = 3)]
-        [string[]]$PatternEntry = '*.nuspec',
+        [Parameter(Position = 2)]
+        [string[]]$EntryPattern = '*.nuspec',
 
         [switch]$NoRecurse
     )
@@ -30,12 +30,12 @@ function Get-NuGetMetadata {
     }
     PROCESS {
         foreach ($p in $Path) {
-            Write-Verbose "Get-NuGetMetadata path: $p"
+            Write-Verbose "Get-NupkgMetadata path: $p"
             if (Test-Path $p) {
                 Get-ChildItem @GCIParam -Path $p |
-                    SelectMatchingFullName -Pattern $PatternFile |
+                    SelectMatchingFullName -Pattern $FilePattern |
                     Get-ZipFileEntry |
-                    SelectMatchingFullName -Pattern $PatternEntry |
+                    SelectMatchingFullName -Pattern $EntryPattern |
                     Get-ZipFileEntryContent |
                     GetNuGetPackageMetadata
             }
