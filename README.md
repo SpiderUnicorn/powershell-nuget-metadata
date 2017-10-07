@@ -1,5 +1,9 @@
-<h1><img src="logo.png" align="bottom" /> Powershell NuGet Metadata Cmdlet</h1> 
+<h1>
+  <img src="logo.png" align="bottom" /> Powershell NuGet Metadata Cmdlet
+</h1> 
+
 [![Build status](https://ci.appveyor.com/api/projects/status/o2t3tprh7avi8d0i?svg=true)](https://ci.appveyor.com/project/SpiderUnicorn/powershell-nuget-metadata)
+
 
 Ever wanted to get metadata from your NuGet packages, such as author or license information? 
 Got lost looking for it in Visual Studio? Are you looking for a simple script that is able to 
@@ -11,7 +15,7 @@ Look no further!
 2. [Examples](#examples)
   * [Simple usage](#simple-usage)
   * [Exporting output](#exporting-output)
-  * [Exluding packages](#excluding-packages)
+  * [Excluding packages](#excluding-packages)
   * [Downloading license information](#downloading-license-information)
 3. [Release History](#release-history)
 4. [License](#license)

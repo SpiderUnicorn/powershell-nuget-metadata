@@ -1,0 +1,6 @@
+version: '3'
+services:
+  pester-test:
+    build: .
+    volumes:
+    - .:/data

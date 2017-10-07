@@ -1,0 +1,4 @@
+.DS_STORE
+bin/
+obj/
+./test/results/results.xml
