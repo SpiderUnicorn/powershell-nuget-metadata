@@ -10,3 +10,4 @@ WORKDIR /data
 
 # run tests when running the container
 CMD powershell -command Invoke-Pester ./NuGetMetadata.Tests.ps1 -OutputFile test/results/results.xml -OutputFormat NUnitXml
+
