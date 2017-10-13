@@ -1,3 +1,4 @@
+Remove-Module NuGetMetadata -ErrorAction SilentlyContinue
 Import-Module "./NuGetMetadata.psm1"
 
 $filePath = @{
@@ -6,11 +7,13 @@ $filePath = @{
     nupkg       = "./test/example.nupkg"
     nonExistent = "./non-existent.file"
     notZipFile  = "./test/test.txt"
+    NugetConfig = "./test/NuGet.Config"
 }
 $filePath['absolute'] = (Resolve-Path $filePath.relative).Path
 
 $dirPath = @{
     currentFolder = "."
+    testProject = ".\test\example"
 }
 
 Describe "Get-NupkgMetadata" {
@@ -94,6 +97,47 @@ Describe "Get-ZipFileEntryContent" {
             Get-ZipFileEntryContent $obj -ErrorVariable err 2>$null
             $err | Should not BeNullOrEmpty
             $zipFile.Dispose()
+        }
+    }
+}
+
+Describe "Get-NuGetMetadata" {
+    Context "Given no parameters" {
+        BeforeEach {
+            Push-Location
+            Set-Location ".\test\example"
+        }
+        It "Finds metadata in project file of current directory" {
+            $result = Get-NuGetMetadata
+
+            $result.id | Should be "xunit"            
+        }
+        AfterEach {
+            Pop-Location
+        }
+    }
+
+    Context "Given a directory" {
+        It "Finds metadata in project file of given directory" {
+            $result = Get-NuGetMetadata -Path $dirPath.testProject
+
+            $result.id | Should be "xunit"
+        }
+    }
+
+    <#
+    Context "Given a NuGet.config file" {
+        It "Finds metadata in the specified repository" {
+            $result = Get-NuGetMetadata -ConfigPath $filePath.NugetConfig
+
+            $result.id | Should be "xunit"
+        }
+    }
+    #>
+
+    Context "Given both directory and config file parameters" {
+        It "Throws an exception because they are mutually exclusive" {
+            { Get-NuGetMetadata -Path "C:\" -ConfigPath "C:\NuGet.Config" } | Should throw
         }
     }
 }
