@@ -2,6 +2,7 @@
 Add-Type -AssemblyName "System.IO.Compression"
 Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
+<<<<<<< HEAD
 <#
 .SYNOPSIS
 Gets metadata from NuGet packages in a project or folder.
@@ -118,21 +119,59 @@ function Get-NuGetMetadata {
     .LINK
     Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
     #>
+=======
+function Get-NuGetMetadata {
+    [CmdletBinding(
+        DefaultParameterSetName = 'Path'
+    )]
+    Param(
+        [Parameter(ParameterSetName = 'Path')]
+        [string]$Path,
+
+        [Parameter(ParameterSetName = 'ConfigPath')]
+        [string]$ConfigPath
+    )
+    BEGIN {
+        $GCIparam = @{
+            Path = $Path
+        }
+
+        $sln = Get-ChildItem -Filter '*.sln' @GCIparam
+        if (!$sln) {
+            $csproj = Get-ChildItem -Filter '*.csproj' @GCIparam
+        }
+    }
+    PROCESS {
+        if (!$csproj -and $sln) {
+            $csproj = $sln | GetProjectFromSolution
+        }
+
+        $csproj |
+            GetPackageNameVersion |
+            GetNuGetPackageDirectory |
+            Get-NupkgMetadata
+    }
+    END {}
+}
+
+#::string -> XmlDocument
+function Get-NupkgMetadata {
+>>>>>>> dd01c2feb4cb0076c1fdcd6997b220b9a190b996
     [CmdLetBinding()]
     Param(
         [Parameter(
-            Position = 1,
+            Position = 0,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true
         )]
         [ValidateNotNullOrEmpty()]
         [string[]]$Path = ".",
 
-        [Parameter(Position = 2)]
-        [string[]]$PatternFile = '*.nupkg',
+        [Parameter(Position = 1)]
+        [string[]]$FilePattern = '*.nupkg',
 
-        [Parameter(Position = 3)]
-        [string[]]$PatternEntry = '*.nuspec',
+        [Parameter(Position = 2)]
+        [string[]]$EntryPattern = '*.nuspec',
 
         [switch]$NoRecurse
     )
@@ -144,12 +183,12 @@ function Get-NuGetMetadata {
     }
     PROCESS {
         foreach ($p in $Path) {
-            Write-Verbose "Get-NuGetMetadata path: $p"
+            Write-Verbose "Get-NupkgMetadata path: $p"
             if (Test-Path $p) {
                 Get-ChildItem @GCIParam -Path $p |
-                    SelectMatchingFullName -Pattern $PatternFile |
+                    SelectMatchingFullName -Pattern $FilePattern |
                     Get-ZipFileEntry |
-                    SelectMatchingFullName -Pattern $PatternEntry |
+                    SelectMatchingFullName -Pattern $EntryPattern |
                     Get-ZipFileEntryContent |
                     GetNuGetPackageMetadata
             }
@@ -157,6 +196,112 @@ function Get-NuGetMetadata {
                 Write-Error -Message "Path '$p' not found"
             }
         }
+    }
+    END {}
+}
+
+function GetProjectFromSolution {
+    [CmdletBinding()]
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [Alias('FullName')]
+        [string]$Path
+    )
+    BEGIN {
+        $projectPattern = '^Project\('
+        $filenameIndex = 2
+    }
+    PROCESS {
+        Write-Verbose "GetCsprojPath input: '$Path'"
+        $directory = Split-Path $Path
+        Get-Content $Path |
+            Select-String $projectPattern |
+            ForEach-Object {
+                $projectPath = ($_ -split '[=,]')[$filenameIndex].Trim(' "')
+                $output = Join-Path $directory $projectPath
+                Write-Verbose "GetCsprojPath project file: $output"
+                if ($output -match '\.csproj$') {
+                    [PSCustomObject]@{
+                        Path = $output
+                    }
+                }
+            }
+    }
+    END {}
+}
+
+function GetPackageNameVersion {
+    <#
+    .SYNOPSIS
+    Receives a .csproj file.
+    Outputs name and version of the package references.
+    
+    .PARAMETER Path
+    A .csproj file.
+    #>
+    [CmdletBinding()]
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [Alias('FullName')]
+        [string]$Path
+    )
+    BEGIN {}
+    PROCESS {
+        Write-Verbose "GetPackageNameVersion input: $Path"
+        if (Test-Path $Path) {
+            $xml = [xml](Get-Content $Path)
+            Select-Xml -Xml $xml -XPath '//PackageReference' |
+                select -ExpandProperty Node |
+                ForEach-Object {
+                    $output = [PSCustomObject]@{
+                        Name    = $_.Include
+                        Version = $_.Version
+                    }
+                    Write-Verbose "GetPackageNameVersion output: $output"
+                    $output
+                }
+        }
+    }
+    END {}
+}
+
+function GetNuGetPackageDirectory {
+    <#
+    .SYNOPSIS
+    Find NuGet packages when they aren't stored in the project directory.
+    Receives an object with Name and Version of a NuGet package.
+    Outputs the NuGet package directory.
+    
+    .PARAMETER NameVersion
+    Parameter description
+    Name
+    #>
+    [CmdletBinding()]
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipeline = $true
+        )]
+        [PSCustomObject]$NameVersion
+    )
+    BEGIN {
+        #todo: add logic here, for NuGet.config n stuff
+        $NuGetDefaultFolder = "$HOME\.NuGet\packages"
+    }
+    PROCESS {
+        Write-Verbose "GetNuGetPackageDirectory input: $Path"
+        $output = [PSCustomObject]@{
+            Path = "$NuGetDefaultFolder\$($NameVersion.Name)\$($NameVersion.Version)"
+        }
+        Write-Verbose "GetNuGetPackageDirectory output: $output"
+        $output
     }
     END {}
 }

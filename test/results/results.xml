@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="13" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2017-10-07" time="17:43:42">
+  <environment nunit-version="2.5.8.0" os-version="0.0.0.0" machine-name="" cwd="/data" platform="Unknown" clr-version="" user="" user-domain="" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="2.2227" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="./NuGetMetadata.Tests.ps1" executed="True" result="Success" success="True" time="2.2227" asserts="0" description="./NuGetMetadata.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Get-NuGetMetaData" executed="True" result="Success" success="True" time="1.5863" asserts="0" description="Get-NuGetMetaData">
+            <results>
+              <test-suite type="TestFixture" name="Given no path (null/empty string)" executed="True" result="Success" success="True" time="1.1681" asserts="0" description="Given no path (null/empty string)">
+                <results>
+                  <test-case description="It throws non-terminating exception" name="Get-NuGetMetaData.Given no path (null/empty string).It throws non-terminating exception" time="1.1681" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given different types of paths" executed="True" result="Success" success="True" time="0.2208" asserts="0" description="Given different types of paths">
+                <results>
+                  <test-case description="works with absolute paths" name="Get-NuGetMetaData.Given different types of paths.works with absolute paths" time="0.2056" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="works with relative paths" name="Get-NuGetMetaData.Given different types of paths.works with relative paths" time="0.0152" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given non-existent file path" executed="True" result="Success" success="True" time="0.0434" asserts="0" description="Given non-existent file path">
+                <results>
+                  <test-case description="Has errors" name="Get-NuGetMetaData.Given non-existent file path.Has errors" time="0.0434" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given example file path" executed="True" result="Success" success="True" time="0.1541" asserts="0" description="Given example file path">
+                <results>
+                  <test-case description="Reads the content of the file" name="Get-NuGetMetaData.Given example file path.Reads the content of the file" time="0.1541" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-ZipFileEntry" executed="True" result="Success" success="True" time="0.1913" asserts="0" description="Get-ZipFileEntry">
+            <results>
+              <test-suite type="TestFixture" name="Given a directory path" executed="True" result="Success" success="True" time="0.0942" asserts="0" description="Given a directory path">
+                <results>
+                  <test-case description="Has errors" name="Get-ZipFileEntry.Given a directory path.Has errors" time="0.0942" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given example zip file with some files" executed="True" result="Success" success="True" time="0.0567" asserts="0" description="Given example zip file with some files">
+                <results>
+                  <test-case description="Return a non-empty collection" name="Get-ZipFileEntry.Given example zip file with some files.Return a non-empty collection" time="0.0355" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Return a ZipArchiveEntry" name="Get-ZipFileEntry.Given example zip file with some files.Return a ZipArchiveEntry" time="0.0212" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given a non zip file" executed="True" result="Success" success="True" time="0.0404" asserts="0" description="Given a non zip file">
+                <results>
+                  <test-case description="Has errors" name="Get-ZipFileEntry.Given a non zip file.Has errors" time="0.0404" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-ZipFileEntryContent" executed="True" result="Success" success="True" time="0.4451" asserts="0" description="Get-ZipFileEntryContent">
+            <results>
+              <test-suite type="TestFixture" name="Given no zip file entry (null)" executed="True" result="Success" success="True" time="0.1739" asserts="0" description="Given no zip file entry (null)">
+                <results>
+                  <test-case description="Returns null" name="Get-ZipFileEntryContent.Given no zip file entry (null).Returns null" time="0.1739" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Given a zip file entry" executed="True" result="Success" success="True" time="0.1618" asserts="0" description="Given a zip file entry">
+                <results>
+                  <test-case description="Should not throw" name="Get-ZipFileEntryContent.Given a zip file entry.Should not throw" time="0.1383" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Gets the contents of the file" name="Get-ZipFileEntryContent.Given a zip file entry.Gets the contents of the file" time="0.0235" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="When file couldn't be opened" executed="True" result="Success" success="True" time="0.1094" asserts="0" description="When file couldn't be opened">
+                <results>
+                  <test-case description="Should have errors" name="Get-ZipFileEntryContent.When file couldn't be opened.Should have errors" time="0.1094" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
