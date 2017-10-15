@@ -2,124 +2,8 @@
 Add-Type -AssemblyName "System.IO.Compression"
 Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
-<<<<<<< HEAD
-<#
-.SYNOPSIS
-Gets metadata from NuGet packages in a project or folder.
-
-.DESCRIPTION
-NuGet stores metada in .nuspec files within .nupkg files which aren't easily accessable. 
-This cmdlet extracts all metadata information as XML from a single package, every package in
-a folder or every package in a folder structure recursively (such as every package on a drive).
-
-.PARAMETER Path
-The directory or file path of a .nupkg file, or directory containing .nupkg files. 
-Can also take a comma-separated list of files or directories to search.
-
-.PARAMETER NoRecurse
-When set, subfolders won't be included in the search for .nupkg files. 
-
-.EXAMPLE
-Read all metadata from all packages in the folder you are in, including all subfolders
-Get-NuGetMetadata
-
-.EXAMPLE
-You can provide both folders and files
-Get-NuGetMetadata C:\Project\
-Get-NuGetMetadata .\example.nupkg
-
-Or a combination of both
-Get-NuGetMetadata .\example.nupkg, C:\Project\
-
-.EXAMPLE
-Export output as comma separated values (.csv)
-Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
-
-.EXAMPLE
-Export output as json. To make conversion from XML to json simple, use slect-object to
-pluck parts of the  output before converting. 
-Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
-
-.EXAMPLE
-Exlude all standard Microsoft packages
-Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
-
-.EXAMPLE
-You can use the metadata to download license information. This is a simple example
-that downloads licenseUrls as html pages ina folder called "Licenses" (needs to created first).
-
-Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
-Out-File -FilePath "./Licenses/$($_.id).html" }
-
-.LINK
-Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
-#>
 
 #::string -> XmlDocument
-function Get-NuGetMetadata {
-    <#
-    .SYNOPSIS
-    Gets metadata from NuGet packages in a project directory.
-
-    .DESCRIPTION
-    NuGet stores metada in .nuspec files within .nupkg files which aren't easily accessable. 
-    This cmdlet extracts all metadata information as XML from a single package, every package in
-    a folder or every package in a folder structure recursively (such as every package on a drive).
-
-    .PARAMETER Path
-    The directory or file path of a .nupkg file, or directory containing .nupkg files. 
-    Can also take a comma-separated list of files or directories to search.
-
-    .PARAMETER NoRecurse
-    When set, subfolders won't be included in the search for .nupkg files. 
-
-    .EXAMPLE
-    Get-NuGetMetadata
-
-    Read all metadata from all packages in the folder you are in, including all subfolders
-
-    .EXAMPLE
-    Get-NuGetMetadata C:\Project\
-
-    Specify a folder to search for .nupkg files in
-
-    .EXAMPLE
-    Get-NuGetMetadata .\example.nupkg
-
-    Specify a .nupkg file
-
-    .EXAMPLE
-    Get-NuGetMetadata .\example.nupkg, C:\Project\
-
-    Specify a list of files and or folders
-
-    .EXAMPLE
-    Get-NuGetMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
-
-    Export output as comma separated values (.csv)
-
-    .EXAMPLE
-    Get-NuGetMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
-
-    Export output as json. To make conversion from XML to json simple, use slect-object to
-    pluck parts of the output before converting. 
-
-    .EXAMPLE
-    Get-NuGetMetadata | ? { $_.id -notlike 'Microsoft*' }
-    
-    Exlude all standard Microsoft packages
-    
-    .EXAMPLE
-    Get-NuGetMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
-    Out-File -FilePath "./Licenses/$($_.id).html" }
-
-    You can use the metadata to download license information. This is a simple example
-    that downloads licenseUrls as html pages ina folder called "Licenses" (needs to created first).
-
-    .LINK
-    Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
-    #>
-=======
 function Get-NuGetMetadata {
     [CmdletBinding(
         DefaultParameterSetName = 'Path'
@@ -129,11 +13,16 @@ function Get-NuGetMetadata {
         [string]$Path,
 
         [Parameter(ParameterSetName = 'ConfigPath')]
-        [string]$ConfigPath
+        [string]$ConfigPath,
+
+        [Parameter(ParameterSetName = 'Path')]
+        [switch]$NoRecurse
     )
+    
     BEGIN {
         $GCIparam = @{
             Path = $Path
+            Recurse = !$NoRecurse
         }
 
         $sln = Get-ChildItem -Filter '*.sln' @GCIparam
@@ -156,7 +45,6 @@ function Get-NuGetMetadata {
 
 #::string -> XmlDocument
 function Get-NupkgMetadata {
->>>>>>> dd01c2feb4cb0076c1fdcd6997b220b9a190b996
     [CmdLetBinding()]
     Param(
         [Parameter(
@@ -190,7 +78,7 @@ function Get-NupkgMetadata {
                     Get-ZipFileEntry |
                     SelectMatchingFullName -Pattern $EntryPattern |
                     Get-ZipFileEntryContent |
-                    GetNuGetPackageMetadata
+                    GetXmlMetadata
             }
             else {
                 Write-Error -Message "Path '$p' not found"
@@ -258,7 +146,7 @@ function GetPackageNameVersion {
         if (Test-Path $Path) {
             $xml = [xml](Get-Content $Path)
             Select-Xml -Xml $xml -XPath '//PackageReference' |
-                select -ExpandProperty Node |
+                Select-Object -ExpandProperty Node |
                 ForEach-Object {
                     $output = [PSCustomObject]@{
                         Name    = $_.Include
@@ -287,9 +175,17 @@ function GetNuGetPackageDirectory {
     Param(
         [Parameter(
             Mandatory = $true,
-            ValueFromPipeline = $true
+            ValueFromPipelineByPropertyName = $true
         )]
-        [PSCustomObject]$NameVersion
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+        
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string]$Version
     )
     BEGIN {
         #todo: add logic here, for NuGet.config n stuff
@@ -298,7 +194,7 @@ function GetNuGetPackageDirectory {
     PROCESS {
         Write-Verbose "GetNuGetPackageDirectory input: $Path"
         $output = [PSCustomObject]@{
-            Path = "$NuGetDefaultFolder\$($NameVersion.Name)\$($NameVersion.Version)"
+            Path = "$NuGetDefaultFolder\$Name\$Version"
         }
         Write-Verbose "GetNuGetPackageDirectory output: $output"
         $output
@@ -362,7 +258,7 @@ function Get-ZipFileEntryContent {
                 $deflateStream = $file.Open()
                 $streamReader = New-Object System.IO.StreamReader($deflateStream)
                 $fileContent = $streamReader.ReadToEnd()
-                $fileContent
+                Write-Output $fileContent
             }
             catch {
                 WriteExceptionAsError $_
@@ -376,8 +272,8 @@ function Get-ZipFileEntryContent {
     END {}
 }
 
-#::XmlDocument -> XmlDocument
-function GetNuGetPackageMetadata {
+#::string[] -> XmlDocument
+function GetXmlMetadata {
     Param(
         [Parameter(
             Mandatory = $true,
