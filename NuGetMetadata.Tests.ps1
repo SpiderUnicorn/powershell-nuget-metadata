@@ -1,4 +1,4 @@
-Import-Module "./NuGetMetadata.psm1"
+Import-Module "./NuGetMetadata.psm1" -Force
 
 $filePath = @{
     test        = "./test/test.zip"
