@@ -15,30 +15,30 @@ $dirPath = @{
     testProject = ".\test\example"
 }
 
-Describe "Get-NupkgMetadata" {
+Describe "Get-NuGetPackageMetadata" {
     Context "Given no path (null/empty string)" {
         It "It throws non-terminating exception" {
-            { Get-NupkgMetadata $null } | Should throw
-            { Get-NupkgMetadata "" } | Should throw
+            { Get-NuGetPackageMetadata $null } | Should throw
+            { Get-NuGetPackageMetadata "" } | Should throw
         }
     }
     Context "Given different types of paths" {
         It "works with absolute paths" {
-            { Get-NupkgMetadata $filePath.absolute } | Should not be $null
+            { Get-NuGetPackageMetadata $filePath.absolute } | Should not be $null
         }
         It "works with relative paths" {
-            { Get-NupkgMetadata $filePath.relative } | Should not be $null
+            { Get-NuGetPackageMetadata $filePath.relative } | Should not be $null
         }
     }
     Context "Given non-existent file path" {
         It "Has errors" {
-            Get-NupkgMetadata $filePath.nonExistent -ErrorVariable err 2>$null
+            Get-NuGetPackageMetadata $filePath.nonExistent -ErrorVariable err 2>$null
             $err.Count | Should BeGreaterThan 0
         }
     }
     Context "Given example file path" {
         It "Reads the content of the file" {
-            @(Get-NupkgMetadata $filePath.nupkg).Count | Should BeGreaterThan 0
+            @(Get-NuGetPackageMetadata $filePath.nupkg).Count | Should BeGreaterThan 0
         }
     }
 }

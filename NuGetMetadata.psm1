@@ -167,10 +167,17 @@ function GetNuGetPackageDirectory {
     Param(
         [Parameter(
             Mandatory = $true,
-            ValueFromPipeline = $true
+            ValueFromPipelineByPropertyName = $true
         )]
-        [PSCustomObject]$NameVersion
+        [string]$Name,
+
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string]$Version
     )
+
     BEGIN {
         #todo: add logic here, for NuGet.config n stuff
         $NuGetDefaultFolder = "$HOME\.NuGet\packages"
@@ -178,7 +185,7 @@ function GetNuGetPackageDirectory {
     PROCESS {
         Write-Verbose "GetNuGetPackageDirectory input: $Path"
         $output = [PSCustomObject]@{
-            Path = "$NuGetDefaultFolder\$($NameVersion.Name)\$($NameVersion.Version)"
+            Path = "$NuGetDefaultFolder\$Name\$Version"
         }
         Write-Verbose "GetNuGetPackageDirectory output: $output"
         $output
