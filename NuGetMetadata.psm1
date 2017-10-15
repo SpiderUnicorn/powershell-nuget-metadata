@@ -1,9 +1,6 @@
 #assemblies loaded in the manifest:
 Add-Type -AssemblyName "System.IO.Compression"
-Add-Type -AssemblyName "System.IO.Compression.FileSystem"
 
-
-#::string -> XmlDocument
 function Get-NuGetMetadata {
     [CmdletBinding(
         DefaultParameterSetName = 'Path'
@@ -13,16 +10,11 @@ function Get-NuGetMetadata {
         [string]$Path,
 
         [Parameter(ParameterSetName = 'ConfigPath')]
-        [string]$ConfigPath,
-
-        [Parameter(ParameterSetName = 'Path')]
-        [switch]$NoRecurse
+        [string]$ConfigPath
     )
-    
     BEGIN {
         $GCIparam = @{
             Path = $Path
-            Recurse = !$NoRecurse
         }
 
         $sln = Get-ChildItem -Filter '*.sln' @GCIparam
@@ -78,7 +70,7 @@ function Get-NupkgMetadata {
                     Get-ZipFileEntry |
                     SelectMatchingFullName -Pattern $EntryPattern |
                     Get-ZipFileEntryContent |
-                    GetXmlMetadata
+                    GetNuGetPackageMetadata
             }
             else {
                 Write-Error -Message "Path '$p' not found"
@@ -146,7 +138,7 @@ function GetPackageNameVersion {
         if (Test-Path $Path) {
             $xml = [xml](Get-Content $Path)
             Select-Xml -Xml $xml -XPath '//PackageReference' |
-                Select-Object -ExpandProperty Node |
+                select -ExpandProperty Node |
                 ForEach-Object {
                     $output = [PSCustomObject]@{
                         Name    = $_.Include
@@ -175,17 +167,9 @@ function GetNuGetPackageDirectory {
     Param(
         [Parameter(
             Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true
+            ValueFromPipeline = $true
         )]
-        [ValidateNotNullOrEmpty()]
-        [string]$Name,
-        
-        [Parameter(
-            Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true
-        )]
-        [ValidateNotNullOrEmpty()]
-        [string]$Version
+        [PSCustomObject]$NameVersion
     )
     BEGIN {
         #todo: add logic here, for NuGet.config n stuff
@@ -194,7 +178,7 @@ function GetNuGetPackageDirectory {
     PROCESS {
         Write-Verbose "GetNuGetPackageDirectory input: $Path"
         $output = [PSCustomObject]@{
-            Path = "$NuGetDefaultFolder\$Name\$Version"
+            Path = "$NuGetDefaultFolder\$($NameVersion.Name)\$($NameVersion.Version)"
         }
         Write-Verbose "GetNuGetPackageDirectory output: $output"
         $output
@@ -258,7 +242,7 @@ function Get-ZipFileEntryContent {
                 $deflateStream = $file.Open()
                 $streamReader = New-Object System.IO.StreamReader($deflateStream)
                 $fileContent = $streamReader.ReadToEnd()
-                Write-Output $fileContent
+                $fileContent
             }
             catch {
                 WriteExceptionAsError $_
@@ -272,8 +256,8 @@ function Get-ZipFileEntryContent {
     END {}
 }
 
-#::string[] -> XmlDocument
-function GetXmlMetadata {
+#::XmlDocument -> XmlDocument
+function GetNuGetPackageMetadata {
     Param(
         [Parameter(
             Mandatory = $true,

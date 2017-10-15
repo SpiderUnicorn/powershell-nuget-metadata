@@ -8,6 +8,8 @@ RUN powershell -command Install-Module -Name Pester -Force -SkipPublisherCheck
 ADD . /data
 WORKDIR /data
 
+RUN dotnet restore "./test/example/example.csproj"
+
 # run tests when running the container
 CMD powershell -command Invoke-Pester ./NuGetMetadata.Tests.ps1 -OutputFile test/results/results.xml -OutputFormat NUnitXml
 
