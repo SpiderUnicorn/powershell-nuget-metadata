@@ -30,13 +30,65 @@ function Get-NuGetMetadata {
         $csproj |
             GetPackageNameVersion |
             GetNuGetPackageDirectory |
-            Get-NupkgMetadata
+            Get-NuGetPackageMetadata
     }
     END {}
 }
 
 #::string -> XmlDocument
-function Get-NupkgMetadata {
+function Get-NuGetPackageMetadata {
+    <#
+    .SYNOPSIS
+    Gets metadata from all NuGet packages in a folder, or from a single package.
+
+    .DESCRIPTION
+    NuGet stores metadata in .nuspec files within .nupkg files. 
+    This cmdlet extracts all metadata information as XML from a single package, every package in
+    a folder, or every package in a folder structure (such as every package on a drive/in a folder).
+
+    .PARAMETER Path
+    The directory path containing .nupkg files, or a file path.
+    Can also take a comma-separated list of directories/files to search.
+
+    .PARAMETER NoRecurse
+    Only search for .nupkg files in the current directory, excluding subfolders. 
+
+    .EXAMPLE
+    Read all metadata from all packages in the folder you are in, including all subfolders
+    Get-NuGetPackageMetadata
+
+    .EXAMPLE
+    You can provide both folders and files
+    Get-NuGetPackageMetadata C:\Project\
+    Get-NuGetPackageMetadata .\example.nupkg
+
+    Or a combination of both
+    Get-NuGetPackageMetadata .\example.nupkg, C:\Project\
+
+    .EXAMPLE
+    Export output as comma separated values (.csv)
+    Get-NuGetPackageMetadata | Export-Csv -NoTypeInformation ./my-metadata-file.csv
+
+    .EXAMPLE
+    Export output as json. To make conversion from XML to json simple, use select-object to
+    pluck parts of the output before converting.
+    Get-NuGetPackageMetadata | Select-Object id, version, licenseUrl | ConvertTo-Json | Out-File ./my-metadata-file.csv
+
+    .EXAMPLE
+    Exlude all standard Microsoft packages
+    Get-NuGetPackageMetadata | ? { $_.id -notlike 'Microsoft*' }
+
+    .EXAMPLE
+    You can use the metadata to download license information. This is a simple example
+    that downloads licenseUrls as html pages in a folder called "Licenses".
+
+    Get-NuGetPackageMetadata | select id, licenseUrl | % { (Invoke-WebRequest $_.licenseUrl).Content |
+    Out-File -FilePath "./Licenses/$($_.id).html" }
+
+    .LINK
+    Contributions are welcome at https://github.com/SpiderUnicorn/powershell-nuget-metadata
+    #>
+
     [CmdLetBinding()]
     Param(
         [Parameter(
@@ -63,7 +115,7 @@ function Get-NupkgMetadata {
     }
     PROCESS {
         foreach ($p in $Path) {
-            Write-Verbose "Get-NupkgMetadata path: $p"
+            Write-Verbose "Get-NuGetPackageMetadata path: $p"
             if (Test-Path $p) {
                 Get-ChildItem @GCIParam -Path $p |
                     SelectMatchingFullName -Pattern $FilePattern |
