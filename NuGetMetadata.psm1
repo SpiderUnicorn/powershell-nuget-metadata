@@ -362,10 +362,10 @@ function SelectMatchingFullName {
 
 function WriteExceptionAsError {
     Param(
-        $Exception
+        $ErrorRecord
     )
-    if (-not ($ex = $Exception.Exception.InnerException)) {
-        $ex = $Exception.Exception
+    if (-not ($ex = $ErrorRecord.Exception.InnerException)) {
+        $ex = $ErrorRecord.Exception
     }
     $exName = $ex.GetType().FullName
     $exMsg = $ex.Message
