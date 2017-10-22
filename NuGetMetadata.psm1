@@ -28,8 +28,8 @@ function Get-NuGetMetadata {
         }
 
         $csproj |
-            GetPackageNameVersion |
-            GetNuGetPackageDirectory |
+            GetXmlPackageReference |
+            GetNuGetPackagePath |
             Get-NuGetPackageMetadata
     }
     END {}
@@ -122,7 +122,7 @@ function Get-NuGetPackageMetadata {
                     Get-ZipFileEntry |
                     SelectMatchingFullName -Pattern $EntryPattern |
                     Get-ZipFileEntryContent |
-                    GetNuGetPackageMetadata
+                    GetXmlMetadata
             }
             else {
                 Write-Error -Message "Path '$p' not found"
@@ -147,14 +147,14 @@ function GetProjectFromSolution {
         $filenameIndex = 2
     }
     PROCESS {
-        Write-Verbose "GetCsprojPath input: '$Path'"
+        Write-Verbose "GetProjectFromSolution input: '$Path'"
         $directory = Split-Path $Path
         Get-Content $Path |
             Select-String $projectPattern |
             ForEach-Object {
                 $projectPath = ($_ -split '[=,]')[$filenameIndex].Trim(' "')
                 $output = Join-Path $directory $projectPath
-                Write-Verbose "GetCsprojPath project file: $output"
+                Write-Verbose "GetProjectFromSolution project file: $output"
                 if ($output -match '\.csproj$') {
                     [PSCustomObject]@{
                         Path = $output
@@ -165,7 +165,7 @@ function GetProjectFromSolution {
     END {}
 }
 
-function GetPackageNameVersion {
+function GetXmlPackageReference {
     <#
     .SYNOPSIS
     Receives a .csproj file.
@@ -186,17 +186,17 @@ function GetPackageNameVersion {
     )
     BEGIN {}
     PROCESS {
-        Write-Verbose "GetPackageNameVersion input: $Path"
+        Write-Verbose "GetXmlPackageReference input: $Path"
         if (Test-Path $Path) {
             $xml = [xml](Get-Content $Path)
             Select-Xml -Xml $xml -XPath '//PackageReference' |
-                select -ExpandProperty Node |
+                Select-Object -ExpandProperty Node |
                 ForEach-Object {
                     $output = [PSCustomObject]@{
                         Name    = $_.Include
                         Version = $_.Version
                     }
-                    Write-Verbose "GetPackageNameVersion output: $output"
+                    Write-Verbose "GetXmlPackageReference output: $output"
                     $output
                 }
         }
@@ -204,7 +204,7 @@ function GetPackageNameVersion {
     END {}
 }
 
-function GetNuGetPackageDirectory {
+function GetNuGetPackagePath {
     <#
     .SYNOPSIS
     Find NuGet packages when they aren't stored in the project directory.
@@ -235,11 +235,11 @@ function GetNuGetPackageDirectory {
         $NuGetDefaultFolder = "$HOME\.NuGet\packages"
     }
     PROCESS {
-        Write-Verbose "GetNuGetPackageDirectory input: $Path"
+        Write-Verbose "GetNuGetPackagePath input: $Path"
         $output = [PSCustomObject]@{
             Path = "$NuGetDefaultFolder\$Name\$Version"
         }
-        Write-Verbose "GetNuGetPackageDirectory output: $output"
+        Write-Verbose "GetNuGetPackagePath output: $output"
         $output
     }
     END {}
@@ -316,7 +316,7 @@ function Get-ZipFileEntryContent {
 }
 
 #::XmlDocument -> XmlDocument
-function GetNuGetPackageMetadata {
+function GetXmlMetadata {
     Param(
         [Parameter(
             Mandatory = $true,
