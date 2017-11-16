@@ -29,11 +29,7 @@ Open powershell and run
 ```
 $ Install-Module NuGetMetadata
 ```
-=======
 This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/). To install, simply open a powershell window (run as administrator) and run the following:
-=======
-This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/).
-To install, simply open a powershell window (run as administrator) and run the following:
 
 ``
 PS> Install-Module NuGetMetadata
