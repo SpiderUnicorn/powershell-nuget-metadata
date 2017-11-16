@@ -6,6 +6,7 @@
 
 
 Ever wanted to get metadata from your NuGet packages, such as author or license information? 
+Ever wanted to get metadata from your NuGet packages, such as author or license information? 
 Got lost looking for it in Visual Studio? Are you looking for a simple script that is able to 
 output all metadata information from a single command?
 Look no further!
@@ -24,8 +25,6 @@ This cmdlet is easy to use and simple to integrate with your build / continuous 
 
 
 ## Installation
-<<<<<<< HEAD
-<<<<<<< HEAD
 Open powershell and run
 ```
 $ Install-Module NuGetMetadata
@@ -35,13 +34,11 @@ This cmdlet is publicly distributed through [PowerShell gallery](https://www.pow
 =======
 This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/).
 To install, simply open a powershell window (run as administrator) and run the following:
->>>>>>> fa854c63e0f43a0e12d41e6aa94e2c262b80a06f
 
 ``
 PS> Install-Module NuGetMetadata
 ``
 
->>>>>>> 706d6559f1345a070365a0d8c7c34359c309eae1
 ## Examples
 ### Simple usage
 Open a PowerShell prompt in your project directory and run:
