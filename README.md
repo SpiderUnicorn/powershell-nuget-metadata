@@ -30,12 +30,6 @@ Open powershell and run
 $ Install-Module NuGetMetadata
 ```
 This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/). To install, simply open a powershell window (run as administrator) and run the following:
-<<<<<<< HEAD
-=======
-=======
-This cmdlet is publicly distributed through [PowerShell gallery](https://www.powershellgallery.com/packages/NuGetMetadata/).
-To install, simply open a powershell window (run as administrator) and run the following:
->>>>>>> 8bee78742a21f2e414499c7189204f5710cd353b
 
 ``
 PS> Install-Module NuGetMetadata
